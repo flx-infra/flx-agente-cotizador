@@ -1,0 +1,64 @@
+# ---------------------------------------------------------------------------
+# flx-agente-cotizador: Cotizador I+D de Flexxus con web propia (etapa 6)
+#
+# Codigo e imagen: bitbucket.org/flexxus_id/flx-agente-cotizador
+# Este repo es solo el stack: lo que Portainer despliega.
+#
+# La pantalla y el motor de agentes corren aca. Los datos (cotizaciones y config) van a
+# flx-agentes-db (Postgres, red flx-agentes). El codigo, el Helpdesk y los documentos salen
+# de flx-mcp-codigo, flx-mcp-helpdesk y flx-mcp-documentos por la misma red.
+#
+# Sin dominio: publica un puerto en la red interna (http://<ip del swarm>:${PORT_PUBLICO}).
+#
+# Variables del stack: SERVICE_NAME, NODE, LOKI_URL, PORT_PUBLICO, EDITORES y los secretos
+# CLAUDE_CODE_OAUTH_TOKEN (o ANTHROPIC_API_KEY) y APP_USERS (usuario:clave,usuario:clave).
+# ---------------------------------------------------------------------------
+version: '3.6'
+
+services:
+  web:
+    image: fabreguesm/flx-agente-cotizador:0.1.0
+    hostname: flx-agente-cotizador
+    ports:
+      - target: 3000
+        published: ${PORT_PUBLICO}
+        protocol: tcp
+        mode: ingress
+    environment:
+      - TZ=America/Argentina/Buenos_Aires
+      - CLAUDE_CODE_OAUTH_TOKEN=${CLAUDE_CODE_OAUTH_TOKEN}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - APP_USERS=${APP_USERS}
+      - EDITORES=${EDITORES}
+      - PGHOST=flx-agentes-db_postgres
+      - PGUSER=flx_agentes
+      - PGDATABASE=flx_agentes
+      - CODIGO_MCP_URL=http://flx-mcp-codigo_mcp:8102/mcp
+      - HELPDESK_MCP_URL=http://flx-mcp-helpdesk_mcp:8101/mcp
+      - DOCUMENTOS_MCP_URL=http://flx-mcp-documentos_mcp:8103/mcp
+      - MAX_PARALELO=2
+    # /data: carpeta de trabajo del Agent SDK (config de Claude). Vive en el nodo de NODE.
+    networks:
+      - default
+      - agentes
+    volumes:
+      - datos:/data
+    deploy:
+      placement:
+        constraints: ["${NODE}"]
+      restart_policy:
+        condition: any
+        delay: 10s
+    logging:
+      driver: loki
+      options:
+        loki-url: ${LOKI_URL}
+
+volumes:
+  datos:
+    name: "${SERVICE_NAME}_datos"
+
+networks:
+  agentes:
+    external: true
+    name: flx-agentes
