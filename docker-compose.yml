@@ -17,7 +17,7 @@ version: '3.6'
 
 services:
   web:
-    image: fabreguesm/flx-agente-cotizador:0.2.1
+    image: fabreguesm/flx-agente-cotizador:0.2.2
     hostname: flx-agente-cotizador
     ports:
       - target: 3000
@@ -37,6 +37,8 @@ services:
       - HELPDESK_MCP_URL=http://flx-mcp-helpdesk_mcp:8101/mcp
       - DOCUMENTOS_MCP_URL=http://flx-mcp-documentos_mcp:8103/mcp
       - MAX_PARALELO=2
+      # El mismo modelo con el que cotizaba el plugin.
+      - CLAUDE_MODEL=claude-opus-5-5
     # /data: carpeta de trabajo del Agent SDK (config de Claude). Vive en el nodo de NODE.
     networks:
       - default
