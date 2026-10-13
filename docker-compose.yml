@@ -17,7 +17,7 @@ version: '3.6'
 
 services:
   web:
-    image: fabreguesm/flx-agente-cotizador:1.0.0
+    image: fabreguesm/flx-agente-cotizador:1.1.0
     hostname: flx-agente-cotizador
     ports:
       - target: 3000
@@ -37,6 +37,8 @@ services:
       - MAX_PARALELO=2
       - RUNNER_URL=http://flx-agentes-runner_runner:3000
       - RUNNER_TOKEN=${RUNNER_TOKEN}
+      # Detras del portal flx-agentes-web: mismo PORTAL_SECRET que el portal. Vacio, la web sigue con su propio usuario.
+      - PORTAL_SECRET=${PORTAL_SECRET}
       - AGENTE_URL=http://flx-agente-cotizador_web:3000/mcp-agente
     # /data: carpeta de trabajo de la web. Vive en el nodo de NODE.
     networks:
