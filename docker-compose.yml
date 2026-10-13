@@ -17,7 +17,7 @@ version: '3.6'
 
 services:
   web:
-    image: fabreguesm/flx-agente-cotizador:0.4.0
+    image: fabreguesm/flx-agente-cotizador:0.5.0
     hostname: flx-agente-cotizador
     ports:
       - target: 3000
@@ -37,6 +37,11 @@ services:
       - HELPDESK_MCP_URL=http://flx-mcp-helpdesk_mcp:8101/mcp
       - DOCUMENTOS_MCP_URL=http://flx-mcp-documentos_mcp:8103/mcp
       - MAX_PARALELO=2
+      # Etapa 4: MOTOR=runner corre las cotizaciones en flx-agentes-runner; vacio o local, en este contenedor (vuelta atras).
+      - MOTOR=${MOTOR}
+      - RUNNER_URL=http://flx-agentes-runner_runner:3000
+      - RUNNER_TOKEN=${RUNNER_TOKEN}
+      - AGENTE_URL=http://flx-agente-cotizador_web:3000/mcp-agente
       # El mismo modelo con el que cotizaba el plugin.
       - CLAUDE_MODEL=claude-opus-5-5
     # /data: carpeta de trabajo del Agent SDK (config de Claude). Vive en el nodo de NODE.
